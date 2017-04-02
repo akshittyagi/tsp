@@ -1,3 +1,7 @@
+/**
+* Underlying assumptions:
+* Graph Node Ids are integers given in ascending order
+*/
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
@@ -48,44 +52,47 @@ void printDistances(Graph &g)
         printf("\n");
     }
 }
-// void printArray(void *start, int length, int args)
-// {
-//     switch (args)
-//     {
-//     case -1:;
-//         double *ptr0;
-//         ptr0 = (double *)start;
-//         for (int i = 0; i < length; i++)
-//             printf("%f\n", *(ptr0 + i));
-//         printf("\n");
-//         break;
-//     case 0:;
-//         char *ptr1;
-//         ptr1 = (char *)start;
-//         for (int i = 0; i < length; i++)
-//             printf("%c", *(ptr1 + i));
-//         printf("\n");
-//         break;
-//     case 1:;
-//         int *ptr2;
-//         ptr2 = (int *)start;
-//         for (int i = 0; i < length; i++)
-//             printf("%d\n", *(ptr2 + i));
-//         printf("\n");
-//         break;
-//     default:;
-//         char **ptr3;
-//         ptr3 = (char **)start;
-//         for (int i = 0; i < length; i++)
-//         {
-//             printf("Chromosomes[%d]: ", i);
-//             for (int j = 0; j < args; j++)
-//                 printf("%c", ptr3[i][j]);
-//             printf("\n");
-//         }
-//     }
-// }
-// /*Helper functions*/
+void printArray(void *start, int length, int args)
+{
+    switch (args)
+    {
+    //C98 Grammar Quirk
+    case -1:;
+        double *ptr0;
+        ptr0 = (double *)start;
+        for (int i = 0; i < length; i++)
+            printf("%f\n", *(ptr0 + i));
+        printf("\n");
+        break;
+    //C98 Grammar Quirk
+    case 0:;
+        char *ptr1;
+        ptr1 = (char *)start;
+        for (int i = 0; i < length; i++)
+            printf("%c", *(ptr1 + i));
+        printf("\n");
+        break;
+    //C98 Grammar Quirk
+    case 1:;
+        int *ptr2;
+        ptr2 = (int *)start;
+        for (int i = 0; i < length; i++)
+            printf("%d\n", *(ptr2 + i));
+        printf("\n");
+        break;
+    default:;
+        char **ptr3;
+        ptr3 = (char **)start;
+        for (int i = 0; i < length; i++)
+        {
+            printf("Chromosomes[%d]: ", i);
+            for (int j = 0; j < args; j++)
+                printf("%c", ptr3[i][j]);
+            printf("\n");
+        }
+    }
+}
+/*Helper functions*/
 string getRandomSequence(Graph &g)
 {
     string ret = "";
