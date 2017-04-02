@@ -1,6 +1,6 @@
 class Chromosome
 {
-  public:
-    std::string sequence;
-    int id;
+public:
+  std::string sequence;
+  int id;
 };

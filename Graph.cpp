@@ -35,11 +35,11 @@ double euclideanDistance(double x1, double y1, double x2, double y2)
 
 void Graph::makeAdjMatrix()
 {
-    for(int i=0;i<cities.size();i++)
-    { 
-        vector<double> ret;  
-        for(int j=0;j<cities.size();j++)
-            ret.push_back(euclideanDistance(cities[i].second.first,cities[i].second.second,cities[j].second.first,cities[j].second.second));
+    for (int i = 0; i < cities.size(); i++)
+    {
+        vector<double> ret;
+        for (int j = 0; j < cities.size(); j++)
+            ret.push_back(euclideanDistance(cities[i].second.first, cities[i].second.second, cities[j].second.first, cities[j].second.second));
         distances.push_back(ret);
     }
     return;
@@ -107,7 +107,7 @@ void Graph::makeGraph(const char *filename)
                     num3 = ((split[2][0] - '0') + (split[2][2] - '0') * (0.1) + (split[2][3] - '0') * (0.01));
             }
 
-            pair< double, double > p1(num2, num3);
+            pair<double, double> p1(num2, num3);
             pair< int, pair<double, double> > p(num1, p1);
             cities.push_back(p);
         }
