@@ -18,6 +18,7 @@
 #define ScalingFactor 10000 //Scaling for fitness eval
 #define startingChar 48
 #define RandFactor 5
+#define P 25
 
 using namespace std;
 
@@ -29,10 +30,13 @@ int getIDFromChar(char ch)
     return (ch - startingChar);
 }
 /*Comparator*/
-bool comparator(double i, double j)
+struct descSort
 {
-    return i > j;
-}
+    inline bool operator() (const Chromosome& chrome1, const Chromosome& chrome2)
+    {
+        return (chrome1.fitVal > chrome2.fitVal);
+    }
+};
 /* Debugging functions*/
 void printCities(Graph &g)
 {
@@ -121,7 +125,7 @@ vector<Chromosome> makePopulation(Graph &g, int population)
     return ret;
 }
 /*Genetic helpers*/
-void calculateFitness(double array[], vector<Chromosome> chromosomes, Graph &g)
+void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
 {
     totalFitness = 0;
     for (int i = 0; i < InitPopulation; i++)
@@ -135,10 +139,11 @@ void calculateFitness(double array[], vector<Chromosome> chromosomes, Graph &g)
             id2 = getIDFromChar(s[j + 1]);
             sum = sum + g.distances[id1 - 1][id2 - 1];
         }
-        sum = sum/ScalingFactor;
+        sum = sum / ScalingFactor;
         sum = ((1.0) / sum);
-        array[i] = sum + rand()%RandFactor;
+        array[i] = sum + rand() % RandFactor;
         totalFitness += array[i];
+        chromosomes[i].fitVal = array[i];
     }
 }
 /*TSP solver*/
@@ -149,6 +154,7 @@ void travellingSalesman(Graph &g)
     double fitnessValues[InitPopulation];
     srand(time(NULL));
     calculateFitness(fitnessValues, chromosomes, g);
+    sort(chromosomes.begin(),chromosomes.end(),descSort());
 }
 
 int main()
