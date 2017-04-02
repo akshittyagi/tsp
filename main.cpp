@@ -8,31 +8,33 @@
 #include <iostream>
 #include "Graph.h"
 #include "Chromosome.h"
+
 #define NumThreads 8
 #define InitPopulation 500
 #define ScalingFactor 10000 //Scaling for fitness eval
+#define startingChar 48
+#define RandFactor 5
 
 using namespace std;
 
-int hashArray[256];
 int totalFitness;
 vector<Chromosome> updatedPopulation;
 /*Hashing Function*/
 int getIDFromChar(char ch)
 {
-    return hashArray[(int)ch];
+    return (ch - startingChar);
 }
 /*Comparator*/
-bool comparator(double i,double j)
+bool comparator(double i, double j)
 {
-    return i>j;
+    return i > j;
 }
 /* Debugging functions*/
 void printCities(Graph &g)
 {
     for (int i = 0; i < g.NumCities; i++)
     {
-        printf("CityIds: %d Lat:%f Long:%f\n", g.cities[i].first,g.cities[i].second.first,g.cities[i].second.second);
+        printf("CityIds: %d Lat:%f Long:%f\n", g.cities[i].first, g.cities[i].second.first, g.cities[i].second.second);
     }
 }
 void printDistances(Graph &g)
@@ -84,73 +86,70 @@ void printDistances(Graph &g)
 //     }
 // }
 // /*Helper functions*/
-// char *getRandomSequence(Graph *g)
-// {
-//     char *ret;
-//     ret = (char *)malloc(g->NumCities * sizeof(char *));
-//     int start = rand() % g->NumCities;
-//     //printf("Start: %d\n",start);
-//     int count = 0;
-//     for (int j = start; count < g->NumCities; j = (j + 1) % g->NumCities)
-//     {
-//         char ch = g->cities[j];
-//         *(ret + count) = ch;
-//         count++;
-//     }
-//     return ret;
-// }
-// char **makePopulation(Graph *g, int population)
-// {
-//     char **ret;
-//     ret = (char **)malloc(population * sizeof(char *));
-//     for (int i = 0; i < population; i++)
-//     {
-//         ret[i] = getRandomSequence(g);
-//     }
-
-//     return ret;
-// }
-// /*Genetic helpers*/
-// void calculateFitness(double array[], char **chromosomes, Graph *g)
-// {
-//     totalFitness = 0;
-//     for (int i = 0; i < InitPopulation; i++)
-//     {
-//         double sum = 0;
-//         char *curr = chromosomes[i];
-//         for (int j = 0; j < g->NumCities - 1; j++)
-//         {
-//             int id1 = getIDFromChar(curr[j]);
-//             int id2 = getIDFromChar(curr[j + 1]);
-//             sum = sum + g->distances[id1][id2];
-//         }
-//         sum = sum / ScalingFactor ;
-//         int rando = rand()%ScalingFactor;
-//         sum = ((1.0) / sum) + (rando)/(ScalingFactor);
-//         array[i] = sum;
-//         totalFitness += array[i];
-//     }
-// }
+string getRandomSequence(Graph &g)
+{
+    string ret = "";
+    int start = rand() % g.NumCities;
+    //printf("Start: %d\n",start);
+    int count = 0;
+    for (int j = start; count < g.NumCities; j = (j + 1) % g.NumCities)
+    {
+        char ch = g.cities[j].first + startingChar;
+        ret += ch;
+        count++;
+    }
+    return ret;
+}
+vector<Chromosome> makePopulation(Graph &g, int population)
+{
+    vector<Chromosome> ret;
+    for (int i = 0; i < population; i++)
+    {
+        string s = getRandomSequence(g);
+        Chromosome chromosome;
+        chromosome.id = i;
+        chromosome.sequence = s;
+        ret.push_back(chromosome);
+    }
+    return ret;
+}
+/*Genetic helpers*/
+void calculateFitness(double array[], vector<Chromosome> chromosomes, Graph &g)
+{
+    totalFitness = 0;
+    for (int i = 0; i < InitPopulation; i++)
+    {
+        double sum = 0;
+        string s = chromosomes[i].sequence;
+        int id1, id2;
+        for (int j = 0; j < g.NumCities - 1; j++)
+        {
+            id1 = getIDFromChar(s[j]);
+            id2 = getIDFromChar(s[j + 1]);
+            sum = sum + g.distances[id1 - 1][id2 - 1];
+        }
+        sum = sum/ScalingFactor;
+        sum = ((1.0) / sum);
+        array[i] = sum + rand()%RandFactor;
+        totalFitness += array[i];
+    }
+}
 /*TSP solver*/
-// void travellingSalesman(Graph &g)
-// {
-//     vector<Chromosomes> chromosomes;
-//     chromosomes = makePopulation(g, InitPopulation);
-
-//     double fitnessValues[InitPopulation];
-//     srand(time(NULL));
-//     calculateFitness(fitnessValues, chromosomes, g);
-
-// }
+void travellingSalesman(Graph &g)
+{
+    vector<Chromosome> chromosomes;
+    chromosomes = makePopulation(g, InitPopulation);
+    double fitnessValues[InitPopulation];
+    srand(time(NULL));
+    calculateFitness(fitnessValues, chromosomes, g);
+}
 
 int main()
 {
     srand(time(NULL));
-    memset(hashArray, 0, 256);
     /*Graph Input*/
     Graph g;
     g.makeGraph("sample_input.txt");
     travellingSalesman(g);
     return 0;
-    
-}  
+}
