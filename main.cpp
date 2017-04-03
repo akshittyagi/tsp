@@ -147,17 +147,30 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
         chromosomes[i].fitVal = array[i];
     }
 }
+Chromosome pmxCrossover(Chromosome p1,Chromosome p2)
+{
+    int i = rand()%(p1.sequence.length()/2);
+    int j = i + rand()%(p1.sequence.length()/2) + 1;
+    int start = i;
+    int end = j;
+    string mapStr = p1.sequence.substr(i,j-i+1);
+    vector< pair< char,char > > mapping;
+    for(i=start;i<=j;i++)
+    {
+        
+    }
+}
 vector<Chromosome> crossover(vector<Chromosome> population, int numParents)
 {
     vector<Chromsome> children;
     for(int i=0;i<numParents-1;i+=2)
     {
-        //do PMX, GX
-
-        //add to set of children
+        Chromosome p1 = population[i];
+        Chromosome p2 = population[i+1];
+        children.push_back(pmxCrossover(p1,p2));
+        children.push_back(gxCrossover(p1,p2));
     }
     return children;
-
 }
 /*TSP solver*/
 Chromosome travellingSalesman(Graph &g)
