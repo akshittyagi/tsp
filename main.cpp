@@ -18,7 +18,8 @@
 #define ScalingFactor 10000 //Scaling for fitness eval
 #define startingChar 48
 #define RandFactor 5
-#define P 25
+#define P 24
+#define maxIter 100
 
 using namespace std;
 
@@ -146,8 +147,20 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
         chromosomes[i].fitVal = array[i];
     }
 }
+vector<Chromosome> crossover(vector<Chromosome> population, int numParents)
+{
+    vector<Chromsome> children;
+    for(int i=0;i<numParents-1;i+=2)
+    {
+        //do PMX, GX
+
+        //add to set of children
+    }
+    return children;
+
+}
 /*TSP solver*/
-void travellingSalesman(Graph &g)
+Chromosome travellingSalesman(Graph &g)
 {
     vector<Chromosome> chromosomes;
     chromosomes = makePopulation(g, InitPopulation);
@@ -155,6 +168,17 @@ void travellingSalesman(Graph &g)
     srand(time(NULL));
     calculateFitness(fitnessValues, chromosomes, g);
     sort(chromosomes.begin(),chromosomes.end(),descSort());
+    Chromosome ret = chromosomes[0];
+    int i = 0;
+    while(i < maxIter)
+    {
+        //Selection Criteria is currently top P parents in the population
+        vector<Chromosome> children = crossover(chromosomes,P);
+        mutateAndAddToPopulation(children, chromosomes);
+        calculateFitness(fitnessValues, chromosomes, g);
+        sort(chromosomes.begin(),chromosomes.end(),descSort());
+        ret = chromosomes[0];    
+    }
 }
 
 int main()
@@ -163,6 +187,6 @@ int main()
     /*Graph Input*/
     Graph g;
     g.makeGraph("sample_input.txt");
-    travellingSalesman(g);
+    Chromsome result = travellingSalesman(g);
     return 0;
 }
