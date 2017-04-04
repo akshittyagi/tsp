@@ -5,4 +5,5 @@ public:
   int id;
   double fitVal;
   bool isFitnessCalculated;
+  double dist;
 };

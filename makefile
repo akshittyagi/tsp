@@ -16,7 +16,7 @@ Graph.o:
 	$(CC) $(CFLAGS) -c Graph.cpp
 	
 run: parallel
-	./$(EXECNAME)
+	time ./$(EXECNAME)
 
 clean:
 	rm -f *~ *.o parallel

@@ -15,12 +15,9 @@
 #include "Chromosome.h"
 
 #define NumThreads 8
-#define InitPopulation 500
-#define ScalingFactor 10000 //Scaling for fitness eval
 #define startingChar 48
-#define RandFactor 5
-#define P 24
-#define maxIter 1
+#define P 256
+#define maxIter 10000
 
 using namespace std;
 
@@ -29,7 +26,7 @@ vector<Chromosome> updatedPopulation;
 int numCities;
 string baseStr;
 Graph gGlobal;
-
+int InitPopulation = 2800;
 /*Hashing Function*/
 int getIDFromChar(char ch)
 {
@@ -141,7 +138,7 @@ vector<Chromosome> makePopulation(Graph &g, int population)
 void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
 {
     totalFitness = 0;
-    for (int i = 0; i < InitPopulation; i++)
+    for (int i = 0; i < chromosomes.size(); i++)
     {
         if (!chromosomes[i].isFitnessCalculated)
         {
@@ -154,9 +151,10 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
                 id2 = getIDFromChar(s[j + 1]);
                 sum = sum + g.distances[id1 - 1][id2 - 1];
             }
-            sum = sum / ScalingFactor;
+            chromosomes[i].dist = sum;
+            //sum = sum / ScalingFactor;
             sum = ((1.0) / sum);
-            array[i] = sum + rand() % RandFactor;
+            array[i] = sum ;
             totalFitness += array[i];
             chromosomes[i].fitVal = array[i];
             chromosomes[i].isFitnessCalculated = true;
@@ -164,52 +162,52 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
     }
 }
 // Could be added to a Chromosome.cpp
-pair<Chromosome, Chromosome> gxCrossover(Chromosome p1, Chromosome p2)
-{
-    Chromsome c1, c2;
-    c1.sequence = p1.sequence;
-    c2.sequence = p2.sequence;
+// pair<Chromosome, Chromosome> gxCrossover(Chromosome p1, Chromosome p2)
+// {
+//     Chromsome c1, c2;
+//     c1.sequence = p1.sequence;
+//     c2.sequence = p2.sequence;
 
-    bool hasBeenSelected[gGlobal.NumCities + 1];
-    fill_n(hasBeenSelected, numCities, false);
+//     bool hasBeenSelected[gGlobal.NumCities + 1];
+//     fill_n(hasBeenSelected, numCities, false);
 
-    for (int i = 0; i < c1.sequence.length(); i++)
-    {
-        if (i < c1.sequence.length() - 1)
-        {
-            char ch = c1.sequence[i];
-            double distance1 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c1.sequence[i + 1])];
-            int found = -1;
-            for (int j = 0; j < c2.sequence.length(); j++)
-                if (ch == c2.sequence[j])
-                    found = j;
-            double distance2;
-            int oldFound = found;
-            if (found < c2.sequence.length() - 1)
-            {
-                distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found + 1])];
-                found = found + 1;
-            }
-            else
-            {
-                distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found - 1])];
-                found = found - 1;
-            }
+//     for (int i = 0; i < c1.sequence.length(); i++)
+//     {
+//         if (i < c1.sequence.length() - 1)
+//         {
+//             char ch = c1.sequence[i];
+//             double distance1 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c1.sequence[i + 1])];
+//             int found = -1;
+//             for (int j = 0; j < c2.sequence.length(); j++)
+//                 if (ch == c2.sequence[j])
+//                     found = j;
+//             double distance2;
+//             int oldFound = found;
+//             if (found < c2.sequence.length() - 1)
+//             {
+//                 distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found + 1])];
+//                 found = found + 1;
+//             }
+//             else
+//             {
+//                 distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found - 1])];
+//                 found = found - 1;
+//             }
 
-            if (distance1 < distance2)
-            {
-                if (!hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1])
-                {
-                    c1.sequence[i + 1] = c2.sequence[found];
-                    hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1] = true;
-                }
-                else
-                {
-                }
-            }
-        }
-    }
-}
+//             if (distance1 < distance2)
+//             {
+//                 if (!hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1])
+//                 {
+//                     c1.sequence[i + 1] = c2.sequence[found];
+//                     hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1] = true;
+//                 }
+//                 else
+//                 {
+//                 }
+//             }
+//         }
+//     }
+// }
 pair<Chromosome, Chromosome> pmxCrossover(Chromosome p1, Chromosome p2)
 {
     int i = rand() % (p1.sequence.length() / 2);
@@ -268,17 +266,17 @@ vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
         Chromosome p1 = population[i];
         Chromosome p2 = population[i + 1];
         pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
-        pair<Chromosome, Chromsome> childsFromGX = gxCrossover(p1, p2);
+        //pair<Chromosome, Chromsome> childsFromGX = gxCrossover(p1, p2);
         children.push_back(childrenFromPMX.first);
         children.push_back(childrenFromPMX.second);
-        children.push_back(childrenFromGX.first);
-        children.push_back(childrenFromGX.second);
+        // children.push_back(childrenFromGX.first);
+        // children.push_back(childrenFromGX.second);
     }
     return children;
 }
 vector<Chromosome> slice(vector<Chromosome> &v, int start, int end)
 {
-    int newlen = end-start+1;
+    int newlen = end - start + 1;
     vector<Chromosome> nv(newlen);
 
     for (int i = 0; i < newlen; i++)
@@ -289,8 +287,9 @@ vector<Chromosome> slice(vector<Chromosome> &v, int start, int end)
 }
 void mutateAndAddToPopulation(vector<Chromosome> &children, vector<Chromosome> &chromosomes)
 {
-    chromosomes = slice(chromosomes,0,P-1);
-    chromosomes.insert(chromosomes.end(),children.begin().children.end());
+    chromosomes = slice(chromosomes, 0, P - 1);
+    chromosomes.insert(chromosomes.end(), children.begin(), children.end());
+    InitPopulation = chromosomes.size();
 }
 /*TSP solver*/
 Chromosome travellingSalesman(Graph &g)
@@ -307,11 +306,15 @@ Chromosome travellingSalesman(Graph &g)
     {
         //Selection Criteria is currently top P parents in the population
         vector<Chromosome> children = crossover(chromosomes, P);
-        // mutateAndAddToPopulation(children, chromosomes);
+        mutateAndAddToPopulation(children, chromosomes);
+        cout<<"Population: "<<chromosomes.size()<<endl;
         calculateFitness(fitnessValues, chromosomes, g);
+
         sort(chromosomes.begin(), chromosomes.end(), descSort());
+
         ret = chromosomes[0];
         i++;
+        cout<<"At iter "<<i<<" "<<": "<<ret.dist<<endl;
     }
     return ret;
 }
@@ -330,5 +333,8 @@ int main()
         baseStr += (i + '0');
     }
     Chromosome result = travellingSalesman(g);
+    for (int i = 0; i < result.sequence.length(); i++)
+        cout << (int)result.sequence[i] - startingChar << " ";
+    cout<<"\nDistance: "<<result.dist<<endl;
     return 0;
 }
