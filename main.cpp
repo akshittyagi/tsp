@@ -4,6 +4,7 @@
 */
 #include <stdio.h>
 #include <omp.h>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -18,7 +19,6 @@
 #define startingChar 48
 #define P 256
 #define maxIter 10000
-
 using namespace std;
 
 int totalFitness;
@@ -40,6 +40,33 @@ struct descSort
         return (chrome1.fitVal > chrome2.fitVal);
     }
 };
+/*Fisher Yates*/
+int rand_int(int n)
+{
+    int limit = RAND_MAX - RAND_MAX % n;
+    int rnd;
+
+    do
+    {
+        rnd = rand();
+    } while (rnd >= limit);
+    return rnd % n;
+}
+
+void shuffle(string &str, int n)
+{
+    int i, j;
+    char tmp;
+
+    for (i = n - 1; i > 0; i--)
+    {
+        j = rand_int(i + 1);
+        tmp = str[j];
+        str[j] = str[i];
+        str[i] = tmp;
+    }
+}
+
 /* Debugging functions*/
 void printCities(Graph &g)
 {
@@ -118,7 +145,8 @@ string getRandomSequence(Graph &g)
     */
 
     ret = baseStr;
-    random_shuffle(ret.begin(), ret.end());
+    //random_shuffle(ret.begin(), ret.end());
+    shuffle(ret,g.NumCities);
     return ret;
 }
 vector<Chromosome> makePopulation(Graph &g, int population)
@@ -154,7 +182,7 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
             chromosomes[i].dist = sum;
             //sum = sum / ScalingFactor;
             sum = ((1.0) / sum);
-            array[i] = sum ;
+            array[i] = sum;
             totalFitness += array[i];
             chromosomes[i].fitVal = array[i];
             chromosomes[i].isFitnessCalculated = true;
@@ -307,14 +335,15 @@ Chromosome travellingSalesman(Graph &g)
         //Selection Criteria is currently top P parents in the population
         vector<Chromosome> children = crossover(chromosomes, P);
         mutateAndAddToPopulation(children, chromosomes);
-        cout<<"Population: "<<chromosomes.size()<<endl;
+        cout << "Population: " << chromosomes.size() << endl;
         calculateFitness(fitnessValues, chromosomes, g);
 
         sort(chromosomes.begin(), chromosomes.end(), descSort());
 
         ret = chromosomes[0];
         i++;
-        cout<<"At iter "<<i<<" "<<": "<<ret.dist<<endl;
+        cout << "At iter " << i << " "
+             << ": " << ret.dist << endl;
     }
     return ret;
 }
@@ -325,6 +354,7 @@ int main()
     /*Graph Input*/
     Graph g;
     g.makeGraph("sample_input.txt");
+
     numCities = g.NumCities;
     gGlobal = g;
     baseStr = "";
@@ -335,6 +365,6 @@ int main()
     Chromosome result = travellingSalesman(g);
     for (int i = 0; i < result.sequence.length(); i++)
         cout << (int)result.sequence[i] - startingChar << " ";
-    cout<<"\nDistance: "<<result.dist<<endl;
+    cout << "\nDistance: " << result.dist << endl;
     return 0;
 }
