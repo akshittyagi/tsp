@@ -4,4 +4,5 @@ public:
   std::string sequence;
   int id;
   double fitVal;
+  bool isFitnessCalculated;
 };

@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -fopenmp -O3 -g
+CFLAGS = -std=c++11 -fopenmp -O3 -g
 OBJS = main.o Graph.o
 EXECNAME = omp
 TESTNAME = Graph
