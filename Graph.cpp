@@ -48,7 +48,7 @@ void Graph::makeGraph(const char *filename)
 {
     string line, nameStr;
     double x, y; // x and y coordinates
-    ifstream file("sample_input.txt");
+    ifstream file(filename);
     int n;
     file >> nameStr >> nameStr >> line >> n >> line;
     string id;
