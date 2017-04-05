@@ -12,6 +12,7 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include "Graph.h"
 #include "Chromosome.h"
 
@@ -27,6 +28,7 @@ int numCities;
 string baseStr;
 Graph gGlobal;
 int InitPopulation = 2800;
+
 /*Hashing Function*/
 int getIDFromChar(char ch)
 {
@@ -146,24 +148,31 @@ string getRandomSequence(Graph &g)
 
     ret = baseStr;
     //random_shuffle(ret.begin(), ret.end());
-    shuffle(ret,g.NumCities);
+    shuffle(ret, g.NumCities);
     return ret;
 }
 vector<Chromosome> makePopulation(Graph &g, int population)
 {
     vector<Chromosome> ret;
-    for (int i = 0; i < population; i++)
+    unordered_set<string> set;
+    for (int i = 0; ret.size()!=population; i++)
     {
         string s = getRandomSequence(g);
-        Chromosome chromosome;
-        chromosome.id = i;
-        chromosome.sequence = s;
-        ret.push_back(chromosome);
+        if (set.find(s) == set.end())
+        {
+            Chromosome chromosome;
+            chromosome.id = i;
+            chromosome.sequence = s;
+            chromosome.isFitnessCalculated = false;
+            ret.push_back(chromosome);
+            set.insert(s);
+        }
     }
+    cout<<"SET SIZE "<<set.size()<<endl;
     return ret;
 }
 /*Genetic helpers*/
-void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
+void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
 {
     totalFitness = 0;
     for (int i = 0; i < chromosomes.size(); i++)
@@ -180,61 +189,32 @@ void calculateFitness(double array[], vector<Chromosome> &chromosomes, Graph &g)
                 sum = sum + g.distances[id1 - 1][id2 - 1];
             }
             chromosomes[i].dist = sum;
-            //sum = sum / ScalingFactor;
             sum = ((1.0) / sum);
-            array[i] = sum;
-            totalFitness += array[i];
-            chromosomes[i].fitVal = array[i];
+            totalFitness += sum;
+            chromosomes[i].fitVal = sum;
             chromosomes[i].isFitnessCalculated = true;
         }
     }
 }
-// Could be added to a Chromosome.cpp
+// // Could be added to a Chromosome.cpp
 // pair<Chromosome, Chromosome> gxCrossover(Chromosome p1, Chromosome p2)
 // {
 //     Chromsome c1, c2;
 //     c1.sequence = p1.sequence;
 //     c2.sequence = p2.sequence;
 
-//     bool hasBeenSelected[gGlobal.NumCities + 1];
-//     fill_n(hasBeenSelected, numCities, false);
+//     unordered_map<char, char> umap1;
+//     unordered_map<char, char> umap2;
 
-//     for (int i = 0; i < c1.sequence.length(); i++)
+//     for (int i = 0; i < c1.sequence.length() - 1; i++)
 //     {
-//         if (i < c1.sequence.length() - 1)
-//         {
-//             char ch = c1.sequence[i];
-//             double distance1 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c1.sequence[i + 1])];
-//             int found = -1;
-//             for (int j = 0; j < c2.sequence.length(); j++)
-//                 if (ch == c2.sequence[j])
-//                     found = j;
-//             double distance2;
-//             int oldFound = found;
-//             if (found < c2.sequence.length() - 1)
-//             {
-//                 distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found + 1])];
-//                 found = found + 1;
-//             }
-//             else
-//             {
-//                 distance2 = gGlobal.distances[getIDFromChar(ch)][getIDFromChar(c2.sequence[found - 1])];
-//                 found = found - 1;
-//             }
-
-//             if (distance1 < distance2)
-//             {
-//                 if (!hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1])
-//                 {
-//                     c1.sequence[i + 1] = c2.sequence[found];
-//                     hasBeenSelected[getIDFromChar(c2.sequence[found]) + 1] = true;
-//                 }
-//                 else
-//                 {
-//                 }
-//             }
-//         }
+//         umap1.insert({c1.sequence[i], c1.sequence[i + 1]});
+//         umap2.insert({c2.sequence[i], c2.sequence[i + 1]});
 //     }
+//     umap1.insert({c1.sequence[c1.length() - 1], c1.sequence[c1.length()-2]});
+//     umap2.insert({c2.sequence[c2.length() - 1], c2.sequence[c2.length()-2]});
+
+
 // }
 pair<Chromosome, Chromosome> pmxCrossover(Chromosome p1, Chromosome p2)
 {
@@ -289,10 +269,27 @@ pair<Chromosome, Chromosome> pmxCrossover(Chromosome p1, Chromosome p2)
 vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
 {
     vector<Chromosome> children;
-    for (int i = 0; i < numParents - 1; i += 2)
+    // for (int i = 0; i < numParents - 1; i += 2)
+    // {
+    //     Chromosome p1 = population[i];
+    //     Chromosome p2 = population[i + 1];
+    //     pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
+    //     //pair<Chromosome, Chromsome> childsFromGX = gxCrossover(p1, p2);
+    //     children.push_back(childrenFromPMX.first);
+    //     children.push_back(childrenFromPMX.second);
+    //     // children.push_back(childrenFromGX.first);
+    //     // children.push_back(childrenFromGX.second);
+    // }
+    /*Random Parent Selection*/
+    srand(time(NULL));
+    while(children.size()!=numParents)
     {
+        int i = rand()%numParents;
+        int j = rand()%numParents;
+        while(j==i)
+            j = rand()%numParents;
         Chromosome p1 = population[i];
-        Chromosome p2 = population[i + 1];
+        Chromosome p2 = population[j];
         pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
         //pair<Chromosome, Chromsome> childsFromGX = gxCrossover(p1, p2);
         children.push_back(childrenFromPMX.first);
@@ -324,26 +321,26 @@ Chromosome travellingSalesman(Graph &g)
 {
     vector<Chromosome> chromosomes;
     chromosomes = makePopulation(g, InitPopulation);
-    double fitnessValues[InitPopulation];
     srand(time(NULL));
-    calculateFitness(fitnessValues, chromosomes, g);
+    calculateFitness(chromosomes, g);
     sort(chromosomes.begin(), chromosomes.end(), descSort());
     Chromosome ret = chromosomes[0];
+    cout << "At iter 0"
+         << " "
+         << ": " << ret.dist << endl;
     int i = 0;
     while (i < maxIter)
     {
         //Selection Criteria is currently top P parents in the population
         vector<Chromosome> children = crossover(chromosomes, P);
         mutateAndAddToPopulation(children, chromosomes);
-        cout << "Population: " << chromosomes.size() << endl;
-        calculateFitness(fitnessValues, chromosomes, g);
-
+       // cout << "Population: " << chromosomes.size() << endl;
+        calculateFitness(chromosomes, g);
         sort(chromosomes.begin(), chromosomes.end(), descSort());
-
         ret = chromosomes[0];
         i++;
-        cout << "At iter " << i << " "
-             << ": " << ret.dist << endl;
+        // cout << "At iter " << i << " "
+        //      << ": " << ret.dist << endl;
     }
     return ret;
 }
