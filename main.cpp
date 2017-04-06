@@ -20,7 +20,7 @@
 #define NumThreads 8
 #define startingChar 48
 #define P 256
-#define maxIter 10000
+#define maxIter 1000
 using namespace std;
 
 int totalFitness;
@@ -197,7 +197,7 @@ void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
     totalFitness = 0;
     for (int i = 0; i < chromosomes.size(); i++)
     {
-        //assert(check(chromosomes[i].sequence));
+        assert(check(chromosomes[i].sequence));
         if (!chromosomes[i].isFitnessCalculated)
         {
             double sum = 0;
@@ -345,24 +345,40 @@ pair<Chromosome, Chromosome> pmxCrossover(Chromosome p1, Chromosome p2)
 vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
 {
     vector<Chromosome> children;
-    /*Random Parent Selection*/
-    srand(time(NULL));
-    while (children.size() != numParents)
+/*Random Parent Selection*/
+
+#pragma omp parallel
     {
-        int i = rand() % numParents;
-        int j = rand() % numParents;
-        while (j == i)
-            j = rand() % numParents;
-        Chromosome p1 = population[i];
-        Chromosome p2 = population[j];
-        if (rand() % 10 <= 7)
+        srand(int(time(NULL)) ^ omp_get_thread_num());
+        vector<Chromosome> localChildren;
+#pragma omp for private(localChildren)
+        for (int counter = 0; counter < (numParents / 4); counter++)
         {
-            pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
-            pair<Chromosome, Chromosome> childrenFromGX = gxCrossover(p1, p2);
-            children.push_back(childrenFromPMX.first);
-            children.push_back(childrenFromPMX.second);
-            children.push_back(childrenFromGX.first);
-            children.push_back(childrenFromGX.second);
+            int i = rand() % numParents;
+            int j = rand() % numParents;
+            while (j == i)
+                j = rand() % numParents;
+            Chromosome p1 = population[i];
+            Chromosome p2 = population[j];
+            if (rand() % 10 <= 7)
+            {
+                // cout << "I: " << counter << " Children of " << p1.sequence << " " << p2.sequence << endl;
+                pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
+                // cout << childrenFromPMX.first.sequence << endl;
+                // cout << childrenFromPMX.second.sequence << endl;
+                pair<Chromosome, Chromosome> childrenFromGX = gxCrossover(p1, p2);
+                // cout << childrenFromGX.first.sequence << endl;
+                // cout << childrenFromGX.second.sequence << endl;
+                localChildren.push_back(childrenFromPMX.first);
+                localChildren.push_back(childrenFromPMX.second);
+                localChildren.push_back(childrenFromGX.first);
+                localChildren.push_back(childrenFromGX.second);
+            }
+#pragma omp critical
+            {
+                if (localChildren.size() != 0)
+                    children.insert(children.end(), localChildren.begin(), localChildren.end());
+            }
         }
     }
     return children;
@@ -380,22 +396,27 @@ vector<Chromosome> slice(vector<Chromosome> &v, int start, int end)
 void mutate(vector<Chromosome> &children)
 {
     srand(time(NULL));
-    for (int index = 0; index < children.size(); index++)
+#pragma omp parallel
     {
-        int count = 0;
-        while (count < numCities)
+        srand(int(time(NULL)) ^ omp_get_thread_num());
+#pragma omp for
+        for (int index = 0; index < children.size(); index++)
         {
-            if (rand() % 100 == 1)
+            int count = 0;
+            while (count < numCities)
             {
-                int i = rand() % numCities;
-                int j = rand() % numCities;
-                while (j == i)
-                    j = rand() % numCities;
-                char temp = children[index].sequence[i];
-                children[index].sequence[i] = children[index].sequence[j];
-                children[index].sequence[j] = temp;
+                if (rand() % 10 == 1)
+                {
+                    int i = rand() % numCities;
+                    int j = rand() % numCities;
+                    while (j == i)
+                        j = rand() % numCities;
+                    char temp = children[index].sequence[i];
+                    children[index].sequence[i] = children[index].sequence[j];
+                    children[index].sequence[j] = temp;
+                }
+                count++;
             }
-            count++;
         }
     }
 }
@@ -418,11 +439,15 @@ Chromosome travellingSalesman(Graph &g)
     cout << "At iter 0"
          << " "
          << ": " << ret.dist << endl;
+    cout << "Population: " << chromosomes.size() << endl;
+
     int i = 0;
     while (i < maxIter)
     {
         //Selection Criteria is currently top P parents in the population
+        cout << "Population before crossover: " << chromosomes.size() << endl;
         vector<Chromosome> children = crossover(chromosomes, P); //TODO: introduce crossover probability
+        cout << "Population before mutation: " << (chromosomes.size() + children.size()) << endl;
         mutateAndAddToPopulation(children, chromosomes);
         cout << "Population: " << chromosomes.size() << endl;
         calculateFitness(chromosomes, g);
@@ -435,12 +460,13 @@ Chromosome travellingSalesman(Graph &g)
     return ret;
 }
 
-int main()
+int main(int arc, char const *argv[])
 {
     srand(time(NULL));
     /*Graph Input*/
     Graph g;
-    g.makeGraph("sample_input.txt");
+    omp_set_num_threads(atoi(argv[2]));
+    g.makeGraph(argv[1]);
     numCities = g.NumCities;
     gGlobal = g;
     baseStr = "";

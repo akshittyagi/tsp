@@ -3,6 +3,8 @@ CFLAGS = -std=c++11 -fopenmp -O3 -g
 OBJS = main.o Graph.o
 EXECNAME = omp
 TESTNAME = Graph
+FILENAME = input3.txt
+NUMTHREADS = 8
 
 all: parallel
 
@@ -16,7 +18,7 @@ Graph.o:
 	$(CC) $(CFLAGS) -c Graph.cpp
 	
 run: parallel
-	time ./$(EXECNAME)
+	time ./$(EXECNAME) $(FILENAME) $(NUMTHREADS) 
 
 clean:
 	rm -f *~ *.o parallel
