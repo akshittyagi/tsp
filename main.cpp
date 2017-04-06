@@ -3,6 +3,7 @@
 * Graph Node Ids are integers given in ascending order
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
 #include <math.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <assert.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -459,7 +461,73 @@ Chromosome travellingSalesman(Graph &g)
     }
     return ret;
 }
+void dumpToFile(string output)
+{
+    ofstream file;
+    file.open("output.txt");
+    file << output;
+    file.close();
+    return;
+}
+string numberToStr(int a, double d, bool flag)
+{
+    string ret = "";
+    if (flag)
+    {
+        int temp = a;
+        while (temp >= 1)
+        {
+            int dig = temp % 10;
+            ret += (char)(dig + '0');
+            temp /= 10;
+        }
+        reverse(ret.begin(), ret.end());
+    }
+    else
+    {
+        double temp = d;
+        string part1 = numberToStr(floor(d), 0, true);
+        int count = 0;
+        ret.append(part1);
+        ret += ".";
+        temp = temp - floor(temp);
+        while (count < 6)
+        {
+            temp = temp * 10;
+            int tt = floor(temp);
+            int dig = tt % 10;
+            ret += (char)(dig + '0');
+            temp = temp - floor(temp);
+            count++;
+        }
+    }
 
+    return ret;
+}
+string getResultAndShow(Chromosome result)
+{
+    string path = "";
+    for (int i = 0; i < result.sequence.length(); i++)
+    {
+        cout << (int)result.sequence[i] - startingChar << " ";
+        if ((int)result.sequence[i] - startingChar >= 10)
+            path.append(numberToStr((int)result.sequence[i] - startingChar, 0, true));
+        else
+            path += (char)(((int)result.sequence[i] - startingChar) + '0');
+        path += " ";
+    }
+    cout << "\nDistance: " << result.dist << endl;
+    string output = "DIMENSION : ";
+    output += numberToStr(numCities, 0, true);
+    output += "\n";
+    output += "TOUR_LENGTH : ";
+    output += numberToStr(0, result.dist, false);
+    output += "\n";
+    output += "TOUR_SECTION\n";
+    output.append(path);
+    output += "\n-1\nEOF\n";
+    return output;
+}
 int main(int arc, char const *argv[])
 {
     srand(time(NULL));
@@ -475,8 +543,6 @@ int main(int arc, char const *argv[])
         baseStr += (i + '0');
     }
     Chromosome result = travellingSalesman(g);
-    for (int i = 0; i < result.sequence.length(); i++)
-        cout << (int)result.sequence[i] - startingChar << " ";
-    cout << "\nDistance: " << result.dist << endl;
+    dumpToFile(getResultAndShow(result));
     return 0;
 }
