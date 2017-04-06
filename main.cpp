@@ -191,6 +191,7 @@ void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
                 id2 = getIDFromChar(s[j + 1]);
                 sum = sum + g.distances[id1 - 1][id2 - 1];
             }
+            sum = sum + g.distances[getIDFromChar(s[0])-1][getIDFromChar(s[g.NumCities-1])-1];
             chromosomes[i].dist = sum;
             sum = ((1.0) / sum);
             totalFitness += sum;
