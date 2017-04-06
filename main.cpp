@@ -19,7 +19,6 @@
 #include "Graph.h"
 #include "Chromosome.h"
 
-#define NumThreads 8
 #define startingChar 48
 #define P 256
 #define maxIter 1000
@@ -430,7 +429,7 @@ void mutateAndAddToPopulation(vector<Chromosome> &children, vector<Chromosome> &
     InitPopulation = chromosomes.size();
 }
 /*TSP solver*/
-Chromosome travellingSalesman(Graph &g)
+pair<Chromosome, double> travellingSalesman(Graph &g)
 {
     vector<Chromosome> chromosomes;
     chromosomes = makePopulation(g, InitPopulation);
@@ -444,6 +443,7 @@ Chromosome travellingSalesman(Graph &g)
     cout << "Population: " << chromosomes.size() << endl;
 
     int i = 0;
+    double start = omp_get_wtime();
     while (i < maxIter)
     {
         //Selection Criteria is currently top P parents in the population
@@ -459,16 +459,11 @@ Chromosome travellingSalesman(Graph &g)
         cout << "At iter " << i << " "
              << ": " << ret.dist << endl;
     }
-    return ret;
+    double end = omp_get_wtime();
+    cout << "Time taken: " << end - start << endl;
+    return make_pair(ret, end - start);
 }
-void dumpToFile(string output)
-{
-    ofstream file;
-    file.open("output.txt");
-    file << output;
-    file.close();
-    return;
-}
+/*File printing functions*/
 string numberToStr(int a, double d, bool flag)
 {
     string ret = "";
@@ -503,6 +498,16 @@ string numberToStr(int a, double d, bool flag)
     }
 
     return ret;
+}
+void dumpToFile(string output, double time)
+{
+    ofstream file;
+    output.append("Time Taken: ");
+    output.append(numberToStr(0, time, false));
+    file.open("output.txt");
+    file << output;
+    file.close();
+    return;
 }
 string getResultAndShow(Chromosome result)
 {
@@ -542,7 +547,7 @@ int main(int arc, char const *argv[])
     {
         baseStr += (i + '0');
     }
-    Chromosome result = travellingSalesman(g);
-    dumpToFile(getResultAndShow(result));
+    pair<Chromosome, double> Result = travellingSalesman(g);
+    dumpToFile(getResultAndShow(Result.first), Result.second);
     return 0;
 }
