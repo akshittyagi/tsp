@@ -28,7 +28,7 @@ vector<Chromosome> updatedPopulation;
 int numCities;
 string baseStr;
 Graph gGlobal;
-int InitPopulation = 2800;
+int InitPopulation = 1000;
 
 /*Hashing Function*/
 int getIDFromChar(char ch)

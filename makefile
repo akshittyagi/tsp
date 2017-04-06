@@ -3,7 +3,7 @@ CFLAGS = -std=c++11 -fopenmp -O3 -g
 OBJS = main.o Graph.o
 EXECNAME = omp
 TESTNAME = Graph
-FILENAME = input3.txt
+FILENAME = sample_input.txt
 NUMTHREADS = 8
 
 all: parallel
