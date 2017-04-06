@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <assert.h>
 #include <unordered_map>
 #include <unordered_set>
 #include "Graph.h"
@@ -70,6 +71,22 @@ void shuffle(string &str, int n)
 }
 
 /* Debugging functions*/
+bool check(string s)
+{
+    if (s.length() != numCities)
+        return false;
+    int arr[numCities];
+    fill_n(arr, numCities, 0);
+    for (int i = 0; i < numCities; i++)
+    {
+        if (arr[getIDFromChar(s[i]) - 1] == 0)
+            arr[getIDFromChar(s[i]) - 1] = 1;
+        else
+            return false;
+    }
+
+    return true;
+}
 void printCities(Graph &g)
 {
     for (int i = 0; i < g.NumCities; i++)
@@ -145,11 +162,11 @@ string getRandomSequence(Graph &g)
         count++;
     }
     */
-    
+
     /* Another Noob randomize
     random_shuffle(ret.begin(), ret.end());
     */
-    
+
     ret = baseStr;
     shuffle(ret, g.NumCities);
     return ret;
@@ -180,6 +197,7 @@ void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
     totalFitness = 0;
     for (int i = 0; i < chromosomes.size(); i++)
     {
+        //assert(check(chromosomes[i].sequence));
         if (!chromosomes[i].isFitnessCalculated)
         {
             double sum = 0;
@@ -191,7 +209,7 @@ void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
                 id2 = getIDFromChar(s[j + 1]);
                 sum = sum + g.distances[id1 - 1][id2 - 1];
             }
-            sum = sum + g.distances[getIDFromChar(s[0])-1][getIDFromChar(s[g.NumCities-1])-1];
+            sum = sum + g.distances[getIDFromChar(s[0]) - 1][getIDFromChar(s[g.NumCities - 1]) - 1];
             chromosomes[i].dist = sum;
             sum = ((1.0) / sum);
             totalFitness += sum;
@@ -337,12 +355,15 @@ vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
             j = rand() % numParents;
         Chromosome p1 = population[i];
         Chromosome p2 = population[j];
-        pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
-        pair<Chromosome, Chromosome> childrenFromGX = gxCrossover(p1, p2);
-        children.push_back(childrenFromPMX.first);
-        children.push_back(childrenFromPMX.second);
-        children.push_back(childrenFromGX.first);
-        children.push_back(childrenFromGX.second);
+        if (rand() % 10 <= 7)
+        {
+            pair<Chromosome, Chromosome> childrenFromPMX = pmxCrossover(p1, p2);
+            pair<Chromosome, Chromosome> childrenFromGX = gxCrossover(p1, p2);
+            children.push_back(childrenFromPMX.first);
+            children.push_back(childrenFromPMX.second);
+            children.push_back(childrenFromGX.first);
+            children.push_back(childrenFromGX.second);
+        }
     }
     return children;
 }
@@ -350,7 +371,6 @@ vector<Chromosome> slice(vector<Chromosome> &v, int start, int end)
 {
     int newlen = end - start + 1;
     vector<Chromosome> nv(newlen);
-
     for (int i = 0; i < newlen; i++)
     {
         nv[i] = v[start + i];
