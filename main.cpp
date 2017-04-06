@@ -45,29 +45,26 @@ struct descSort
     }
 };
 /*Fisher Yates*/
-int rand_int(int n)
+int randInt(int n)
 {
     int limit = RAND_MAX - RAND_MAX % n;
-    int rnd;
-
+    int random;
     do
     {
-        rnd = rand();
-    } while (rnd >= limit);
-    return rnd % n;
+        random = rand();
+    } while (random >= limit);
+    return random % n;
 }
 
 void shuffle(string &str, int n)
 {
-    int i, j;
-    char tmp;
-
-    for (i = n - 1; i > 0; i--)
+    char temp;
+    for (int i = n - 1; i > 0; i--)
     {
-        j = rand_int(i + 1);
-        tmp = str[j];
+        int j = randInt(i + 1);
+        temp = str[j];
         str[j] = str[i];
-        str[i] = tmp;
+        str[i] = temp;
     }
 }
 
@@ -220,6 +217,44 @@ void calculateFitness(vector<Chromosome> &chromosomes, Graph &g)
     }
 }
 // Could be added to a Chromosome.cpp
+pair<Chromosome, Chromosome> cxCrossover(Chromosome p1, Chromosome p2)
+{
+    srand(int(time(NULL)) ^ omp_get_thread_num());
+    vector<int> indices;
+    int firstRandomIndex = rand() % numCities;
+    indices.push_back(firstRandomIndex);
+    char ch = p2.sequence[firstRandomIndex];
+    int i;
+    for (i = 0; i < p1.sequence.length(); i++)
+        if (p1.sequence[i] == ch)
+            break;
+    firstRandomIndex = i;
+    while (firstRandomIndex != indices[0])
+    {
+        indices.push_back(firstRandomIndex);
+        ch = p2.sequence[firstRandomIndex];
+        int j = 0;
+        for (j = 0; j < p1.sequence.length(); j++)
+            if (p1.sequence[j] == ch)
+                break;
+        firstRandomIndex = j;
+    }
+
+    Chromosome c1, c2;
+    c1.sequence = p1.sequence;
+    c2.sequence = p2.sequence;
+    c1.isFitnessCalculated = false;
+    c2.isFitnessCalculated = false;
+
+    for (int counter = 0; counter < indices.size(); counter++)
+    {
+        char tempCh = c1.sequence[counter];
+        c1.sequence[counter] = c2.sequence[counter];
+        c2.sequence[counter] = tempCh;
+    }
+
+    return make_pair(c1,c2);
+}
 pair<Chromosome, Chromosome> gxCrossover(Chromosome p1, Chromosome p2)
 {
     Chromosome c1, c2;
@@ -353,7 +388,7 @@ vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
         srand(int(time(NULL)) ^ omp_get_thread_num());
         vector<Chromosome> localChildren;
 #pragma omp for private(localChildren)
-        for (int counter = 0; counter < (numParents / 4); counter++)
+        for (int counter = 0; counter < (numParents / 6); counter++)
         {
             int i = rand() % numParents;
             int j = rand() % numParents;
@@ -370,10 +405,13 @@ vector<Chromosome> crossover(vector<Chromosome> &population, int numParents)
                 pair<Chromosome, Chromosome> childrenFromGX = gxCrossover(p1, p2);
                 // cout << childrenFromGX.first.sequence << endl;
                 // cout << childrenFromGX.second.sequence << endl;
+                pair<Chromosome, Chromosome> childrenFromCX = cxCrossover(p1, p2); 
                 localChildren.push_back(childrenFromPMX.first);
                 localChildren.push_back(childrenFromPMX.second);
                 localChildren.push_back(childrenFromGX.first);
                 localChildren.push_back(childrenFromGX.second);
+                // localChildren.push_back(childrenFromCX.first);
+                // localChildren.push_back(childrenFromCX.second);
             }
 #pragma omp critical
             {

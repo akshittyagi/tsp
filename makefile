@@ -1,9 +1,9 @@
 CC = g++
-CFLAGS = -std=c++11 -fopenmp -O3 -g
+CFLAGS = -std=c++11 -fopenmp -g
 OBJS = main.o Graph.o
 EXECNAME = omp
 TESTNAME = Graph
-FILENAME = sample_input.txt
+FILENAME = input3.txt
 NUMTHREADS = 8
 
 all: parallel
