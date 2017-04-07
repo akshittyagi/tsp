@@ -4,12 +4,13 @@
 # ${1:Solving Travelling Salesman using Genetic Algorithms}
 
 ## Running the code 
-`make
- make run`
+```make
+ make run```
 
 Or alternatively use:
-`make
- ./omp <InputFileName> <NumThreads>`
+```make
+ ./omp <InputFileName> <NumThreads>```
+ 
 ## Contributing
 
 1. Fork it!
