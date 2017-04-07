@@ -32,17 +32,6 @@ Special care had to be taken in the case of different seeds for rand() for diffe
 The for loops have been parallelised using standard omp technqiues and use the static load balancing.
 </p>
 
-## Performance
-For a test case of 32 cities following are the running times: (4 core, i7-1.8Ghz)
-| Threads       | Running Times(s) |
-| ------------- |:----------------:|
-| 4             | 15.6586          |
-| 6             | 5.814            |
-| 8             | 4.824            |
-| 12            | 3.489            |
-| 16            | 3.005            |
-| 24            | 2.744            |
-| 32            | 2.610            |
 
 ]]></content>
   <tabTrigger>readme</tabTrigger>
