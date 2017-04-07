@@ -1,5 +1,4 @@
-# TSP
-# ${1:Solving Travelling Salesman using Genetic Algorithms}
+# Solving Travelling Salesman using Genetic Algorithms
 
 ## Running the code 
 ```Makefile
@@ -33,6 +32,7 @@ The for loops have been parallelised using standard omp technqiues and use the s
 
 ## Performance
 For a test case of 32 cities following are the running times: (4 core, i7-1.8Ghz)
+
 | Threads       | Running Times(s) |
 |:-------------:|:----------------:|
 | 4             | 15.6586          |
