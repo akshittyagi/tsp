@@ -1,4 +1,5 @@
 # Solving Travelling Salesman using Genetic Algorithms
+## Build status
 [![Build Status](https://travis-ci.org/akshittyagi/tsp.svg?branch=master)](https://travis-ci.org/akshittyagi/tsp)
 ## Running the code 
 ```Makefile
