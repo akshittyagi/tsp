@@ -1,7 +1,7 @@
 # Solving Travelling Salesman using Genetic Algorithms
 ## Build status
 [![Build Status](https://travis-ci.org/akshittyagi/tsp.svg?branch=master)](https://travis-ci.org/akshittyagi/tsp)
-## Running the code 
+## Running the code
 ```Makefile
  make
  make run
@@ -13,7 +13,7 @@ Or alternatively use:
  ```
 
 ## Algorithm
-<p>Given the conditions of the problem at hand I have chosen the initial population of the first generation to be 1000 with a `P` of 256.
+<p>Given the conditions of the problem at hand I have chosen the initial population of the first generation to be 1000 with a P of 256( P is the number of the fittest parents selected to crossover with a probability of 0.8 ).
 The algorithm works as follows : it first initialises the population with a set of chromosomes all distinct as can be seen from the use of std::set<T>.
 This is sorted and the initial guess is stored. After entering the while loop for iterations I first crossover with PMX and GX and use their offsprings and the parents 
 of these offsprings as the new population. This is sorted and the fitness of the new children is evaluated. 
